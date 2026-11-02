@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مدیریت مالی ساختمان</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--tx:#1b2430;--mu:#6b7684;--pr:#0f766e;--prt:#fff;--ok:#15803d;--bad:#b91c1c;--wr:#ca8a04;--bd:#e3e7ec;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10161c;--card:#19212a;--tx:#e8edf2;--mu:#93a0ae;--pr:#2dd4bf;--prt:#06231f;--ok:#4ade80;--bad:#f87171;--wr:#facc15;--bd:#2a3541;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10161c;--card:#19212a;--tx:#e8edf2;--mu:#93a0ae;--pr:#2dd4bf;--prt:#06231f;--ok:#4ade80;--bad:#f87171;--wr:#facc15;--bd:#2a3541;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:400 14px/1.6 Vazirmatn,Tahoma,sans-serif;padding-bottom:90px}
+h1{font-size:18px;margin:0;padding:14px 16px 4px}
+h2{font-size:15px;margin:16px 0 8px}
+main{padding:4px 14px}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.s,.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px}
+.s small{color:var(--mu);display:block;font-size:12px}.s b{font-size:15px}
+.card{margin-bottom:8px}
+.fl{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.t{font-weight:600}.m{color:var(--mu);font-size:12px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.wr{color:var(--wr)}.pt{color:#ea580c}.chip.h{color:#ea580c;border-color:#ea580c}
+.btn,.chip{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;text-decoration:none;display:inline-block}
+.chip{border-radius:99px;padding:2px 10px;font-size:12px;margin:3px 0 0 4px}
+.chip.p{color:var(--ok);border-color:var(--ok)}.chip.u{color:var(--bad);border-color:var(--bad)}
+.pri{background:var(--pr);color:var(--prt);border:0}
+.tw{overflow-x:auto;border:1px solid var(--bd);border-radius:12px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{padding:6px 4px;text-align:center;font-size:12px;border-bottom:1px solid var(--bd);white-space:nowrap}
+th:first-child,td:first-child{position:sticky;right:0;background:var(--card);padding:6px 8px;text-align:right}
+td button{background:none;border:0;font:700 16px Vazirmatn,Tahoma;cursor:pointer;width:100%}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;border:0;background:none;color:var(--mu);padding:12px 2px;font:600 12px Vazirmatn,Tahoma,sans-serif;cursor:pointer}
+nav button.on{color:var(--pr)}
+.fab{position:fixed;left:14px;bottom:calc(66px + env(safe-area-inset-bottom,0px));background:var(--pr);color:var(--prt);border:0;border-radius:99px;padding:12px 20px;font:700 14px Vazirmatn,Tahoma,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:pointer}
+#md{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;z-index:5}
+#md.on{display:flex}
+#f{background:var(--card);width:100%;max-height:90%;overflow:auto;padding:16px;border-radius:16px 16px 0 0;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+input,select{width:100%;margin:3px 0 10px;padding:9px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit}
+input[type=checkbox]{width:auto;margin:0 0 0 6px}
+label{font-size:12px;color:var(--mu);display:block}
+.cb{display:inline-flex;align-items:center;margin:0 0 6px 10px;color:var(--tx);font-size:13px}
+#toast{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:8px 16px;border-radius:10px;display:none;z-index:9;font-size:13px}
+.empty{text-align:center;color:var(--mu);padding:24px 0}
+</style>
+</head>
+<body>
+<h1>🏢 مدیریت مالی ساختمان</h1>
+<main id="main"></main>
+<button class="fab" id="fab">+ افزودن</button>
+<nav id="nav"></nav>
+<div id="md"><form id="f"></form></div>
+<div id="toast"></div>
+<script>
+var KEY='bfin-v2',tab='rep',F=null,armed=null,
+MN=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'],
+TY={per:'دوره‌ای',rep:'تعمیرات',oth:'متفرقه'},
+D={units:[],exp:[],log:[],S:{charge:0,group:'',mgr:''}};
+try{var r=localStorage.getItem(KEY);if(r)D=JSON.parse(r)}catch(e){}
+D.log=D.log||[];
+function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
+function $(i){return document.getElementById(i)}
+function n(x){return Number(x||0).toLocaleString('fa-IR')}
+function num(x){return +String(x||'').replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/[٬,\s]/g,'')||0}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function jnow(){var o={};new Intl.DateTimeFormat('en-u-ca-persian',{year:'numeric',month:'numeric',day:'numeric'}).formatToParts(new Date()).forEach(function(x){o[x.type]=x.value});return{y:+o.year,m:+o.month,d:+o.day}}
+var J=jnow(),yr=J.y;
+function toast(t){var e=$('toast');e.textContent=t;e.style.display='block';setTimeout(function(){e.style.display='none'},2500)}
+function ask(k,fn){if(armed===k){armed=null;fn()}else{armed=k;toast('برای تأیید، دوباره بزن');setTimeout(function(){armed=null},3000)}}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
+function norm(s){return String(s||'').replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).trim().toLowerCase()}
+function lg(x){var t=jnow();D.log.unshift({d:t.y+'/'+t.m+'/'+t.d+' '+new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'}),x:x});if(D.log.length>300)D.log.length=300}
+function ulog(a,b){var L={no:'شماره واحد',owner:'نام ساکن',kind:'نوع ساکن',people:'تعداد نفرات',phone:'تلفن',vacant:'وضعیت'};['no','owner','kind','people','phone','vacant'].forEach(function(k){var x=a[k],y=b[k];if(k==='kind'){x=x==='t'?'مستاجر':'مالک';y=y==='t'?'مستاجر':'مالک'}if(k==='vacant'){x=x?'خالی':'پر';y=y?'خالی':'پر'}if(x!==y)lg('واحد '+a.no+': '+L[k]+' از «'+(x||'-')+'» به «'+(y||'-')+'» تغییر کرد')})}
+function U(id){return D.units.filter(function(u){return u.id===id})[0]}
+function st(u,y,m){var s=u.st&&u.st[y+'-'+m];if(s==='x')return '';return s||(u.vacant?'v':'')}
+function shares(e){if(e.type==='per')return [];
+ var us=(e.units||[]).map(U).filter(Boolean),pp=e.method==='p',t=pp?us.reduce(function(a,u){return a+(u.people||1)},0):us.length;
+ return us.map(function(u){return{u:u,a:t?Math.round(e.amount*(pp?(u.people||1):1)/t):0}})}
+function debts(u){
+ var l=[],c=D.S.charge||0;
+ {var sy=J.y;(D.S.per||[]).forEach(function(p){if(p.fy<sy)sy=p.fy});for(var yy=sy;yy<=J.y;yy++)for(var m=1;m<=(yy===J.y?J.m:12);m++){var c2=chargeFor(yy,m);if(c2&&!st(u,yy,m)){var rm=c2-cpd(u,yy,m);if(rm>0)l.push({t:'شارژ '+MN[m-1]+(yy!==J.y?' '+yy:'')+(rm<c2?' (باقی‌مانده)':''),a:rm})}}}
+ D.exp.forEach(function(e){shares(e).forEach(function(s){if(s.u.id===u.id){var rm=s.a-ep(e,u.id,s.a);if(rm>0)l.push({t:e.title+(rm<s.a?' (باقی‌مانده)':''),a:rm})}})});
+ return l}
+function sum(l){return l.reduce(function(a,x){return a+x.a},0)}
+function cpd(u,y,m){return +(u.cp&&u.cp[y+'-'+m])||0}
+function ep(e,id,a){var v=(e.paid||{})[id];return v===true?a:(+v||0)}
+function smsText(u){var l=debts(u);return 'سلام، '+(u.owner||'ساکن')+' عزیز (واحد '+u.no+')\nبدهی‌های شما:\n'+l.map(function(x){return '- '+x.t+': '+n(x.a)}).join('\n')+'\nجمع: '+n(sum(l))+' تومان\n'+(D.S.mgr?'مدیر ساختمان: '+D.S.mgr:'')}
+function grpText(){
+ var t='📋 گزارش بدهی‌های ساختمان\n';
+ D.units.forEach(function(u){var s=sum(debts(u));if(s)t+='واحد '+u.no+(u.owner?' ('+u.owner+')':'')+': '+n(s)+' تومان\n'});
+ return t}
+function expText(e){return '💸 '+e.title+' ('+TY[e.type]+')\nمبلغ کل: '+n(e.amount)+' تومان\nتقسیم '+(e.method==='p'?'بر اساس نفر':'بر اساس واحد')+':\n'+shares(e).map(function(s){return 'واحد '+s.u.no+': '+n(s.a)}).join('\n')}
+function grpBtn(k,i,lb){return '<button class="btn" data-gm="'+k+'|'+i+'">'+lb+'</button>'}
+function R(){
+ var tabs=[['rep','گزارش‌ها'],['units','واحدها'],['exp','هزینه‌ها'],['log','تاریخچه'],['set','تنظیمات']];
+ $('nav').innerHTML=tabs.map(function(t){return '<button data-t="'+t[0]+'" class="'+(tab===t[0]?'on':'')+'">'+t[1]+'</button>'}).join('');
+ $('fab').style.display=(tab==='units'||tab==='exp')?'block':'none';
+ var h='';
+ if(tab==='rep')h=repH();else if(tab==='units')h=D.units.map(function(u,i){return '<div class="card fl" data-edit="'+i+'" style="cursor:pointer"><div><div class="t">واحد '+esc(u.no)+' — '+esc(u.owner||'بدون نام')+'</div><div class="m">'+(u.kind==='t'?'مستاجر':'مالک')+' · '+n(u.people)+' نفر · '+esc(u.phone||'بدون تلفن')+'</div></div><div><span class="chip '+(u.vacant?'':'p')+'">'+(u.vacant?'خالی':'پر')+'</span> <span class="btn">✏️ ویرایش</span></div></div>'}).join('')||'<div class="empty">واحدی ثبت نشده. «افزودن» را بزن.</div>';
+ else if(tab==='exp')h=expH2();else if(tab==='log')h=logH();else h=setH();
+ $('main').innerHTML=h}
+function repH(){
+ var cp=0,sp=0,ex=0;
+ D.units.forEach(function(u){for(var m=1;m<=12;m++){var s=st(u,yr,m);cp+=s==='p'?chargeFor(yr,m,true):s===''?cpd(u,yr,m):0}});
+ D.exp.forEach(function(e){ex+=e.amount;shares(e).forEach(function(s){sp+=ep(e,s.u.id,s.a)})});
+ var ci=cp,inc=ci+sp,dt=0;D.units.forEach(function(u){dt+=sum(debts(u))});
+ var h='<h2>خلاصه</h2><div class="g"><div class="s"><small>درآمد شارژ ('+yr+')</small><b class="ok">'+n(ci)+'</b></div><div class="s"><small>دریافتی بابت هزینه‌ها/تعمیرات</small><b class="ok">'+n(sp)+'</b></div><div class="s"><small>کل هزینه‌ها</small><b class="bad">'+n(ex)+'</b></div><div class="s"><small>موجودی صندوق</small><b>'+n(inc-ex)+'</b></div></div><div class="s" style="margin-top:8px"><small>جمع بدهی‌های معوق (تومان)</small><b class="bad">'+n(dt)+'</b></div>';
+ var by={};D.exp.forEach(function(e){by[e.type]=(by[e.type]||0)+e.amount});
+ h+='<div class="m" style="margin-top:6px">'+Object.keys(by).map(function(k){return TY[k]+': '+n(by[k])}).join(' · ')+'</div>';
+ h+='<h2 class="fl"><span>گزارش شارژ سال</span><span><button class="btn" data-y="-1">›</button> <b>'+yr+'</b> <button class="btn" data-y="1">‹</button></span></h2><div class="tw"><table><tr><th>واحد</th>'+MN.map(function(x){return '<th>'+x+'</th>'}).join('')+'</tr>';
+ h+=D.units.map(function(u){return '<tr><td>'+esc(u.no)+'</td>'+MN.map(function(_,i){var m=i+1,s=st(u,yr,m),fut=yr>J.y||(yr===J.y&&m>J.m);return '<td><button data-c="'+u.id+'|'+m+'" class="'+(s==='p'?'ok':s==='v'?'wr':cpd(u,yr,m)>0?'pt':'bad')+'" style="opacity:'+((fut||!inR(yr,m))&&s!=='p'&&!cpd(u,yr,m)?.4:1)+'">'+(s==='p'?'✓':s==='v'?'—':cpd(u,yr,m)>0?'◐':'✗')+'</button></td>'}).join('')+'</tr>'}).join('')+'</table></div><div class="m" style="margin-top:4px">روی هر خانه بزن تا مبلغ دریافتی را ثبت کنی. ✓ کامل · ◐ ناقص (نارنجی) · ✗ پرداخت‌نشده · — خالی</div>';
+ h+='<h2>بدهی هر واحد</h2>'+D.units.map(function(u,i){var l=debts(u),s=sum(l);return '<div class="card"><div class="fl"><div><div class="t">واحد '+esc(u.no)+' — '+esc(u.owner||'')+'</div><div class="m">'+(s?l.length+' مورد':'بدون بدهی')+'</div></div><b class="'+(s?'bad':'ok')+'">'+n(s)+'</b></div>'+(s?'<div style="margin-top:6px"><button class="btn pri" data-sms="'+i+'">📤 ارسال بدهی</button></div>':'')+'</div>'}).join('');
+ h+='<div style="margin-top:8px">'+grpBtn('d',0,'📣 ارسال بدهی‌ها به گروه')+'</div>';
+ return D.units.length?h:'<div class="empty">اول از تب «واحدها» واحدها را اضافه کن، بعد در «تنظیمات» مبلغ شارژ ماهانه را بنویس.</div>'}
+var OPEN={};
+function expH2(){
+ return D.exp.map(function(e,i){
+  var per=e.type==='per',sh=shares(e),all=sh.length&&sh.every(function(s){return ep(e,s.u.id,s.a)>=s.a}),col=(per||all)?'var(--ok)':sh.length?'var(--bad)':'var(--bd)',op=OPEN[e.id];
+  var h='<div class="card" style="display:block;border-right:4px solid '+col+'"><div class="fl" data-xp="'+e.id+'" style="cursor:pointer"><div><div class="t">'+esc(e.title)+(per?' <span class="m">· دوره‌ای — پرداخت از شارژ ساختمان</span>':'')+'</div><div class="m">'+esc(e.date)+'</div></div><div><b>'+n(e.amount)+'</b> <span class="m">'+(op?'▲':'▼')+'</span></div></div>';
+  if(op){
+   h+='<div class="m" style="margin-top:6px">'+TY[e.type]+(per?' · از صندوق ساختمان پرداخت می‌شود':' · '+(e.method==='p'?'بر اساس نفر':'بر اساس واحد'))+'</div>';
+   if(!per)h+='<div>'+sh.map(function(s){var pd=ep(e,s.u.id,s.a);return '<button class="chip '+(pd>=s.a?'p':pd>0?'h':'u')+'" data-pay="'+i+'|'+s.u.id+'">واحد '+esc(s.u.no)+': '+n(s.a)+(pd>=s.a?' ✓':pd>0?' (دریافت '+n(pd)+')':'')+'</button>'}).join('')+'</div><div style="margin-top:8px">'+grpBtn('e',i,'📣 ارسال به گروه')+'</div>';
+   h+='<div style="margin-top:8px"><button class="btn" data-del="'+i+'">🗑 حذف</button></div>'}
+  return h+'</div>'}).join('')||'<div class="empty">هزینه‌ای ثبت نشده.</div>'}
+function expH(){
+ return D.exp.map(function(e,i){var sh=shares(e);return '<div class="card"><div class="fl"><div><div class="t">'+esc(e.title)+'</div><div class="m">'+TY[e.type]+' · '+(e.method==='p'?'بر اساس نفر':'بر اساس واحد')+' · '+esc(e.date)+'</div></div><div><b>'+n(e.amount)+'</b> <button class="btn" data-del="'+i+'">🗑</button></div></div><div>'+sh.map(function(s){var pd=ep(e,s.u.id,s.a);return '<button class="chip '+(pd>=s.a?'p':pd>0?'h':'u')+'" data-pay="'+i+'|'+s.u.id+'">واحد '+esc(s.u.no)+': '+n(s.a)+(pd>=s.a?' ✓':pd>0?' (دریافت '+n(pd)+')':'')+'</button>'}).join('')+'</div><div style="margin-top:8px">'+grpBtn('e',i,'📣 ارسال به گروه')+'</div></div>'}).join('')||'<div class="empty">هزینه‌ای ثبت نشده.</div>'}
+function logH(){return '<div class="m" style="margin-bottom:8px">همه‌ی تغییرات واحدها، شارژها و هزینه‌ها اینجا ثبت می‌شود.</div>'+(D.log.map(function(l){return '<div class="card"><div class="m">'+esc(l.d)+'</div><div>'+esc(l.x)+'</div></div>'}).join('')||'<div class="empty">هنوز تغییری ثبت نشده.</div>')}
+function setH(){return perH()+'<div class="card"><label>لینک گروه (تلگرام، واتساپ، ایتا...)</label><input id="sg" dir="ltr" placeholder="https://t.me/..." value="'+esc(D.S.group)+'"><label>نام مدیر (برای پایان پیام‌ها)</label><input id="sm" value="'+esc(D.S.mgr)+'"><button class="btn pri" data-sv="1">ذخیره</button></div><div class="card" style="display:block"><div class="t">پشتیبان‌گیری</div><div class="m" style="margin:4px 0 8px">آخرین پشتیبان: '+esc(D.S.lb||'هنوز گرفته نشده')+'</div><div class="fl"><button class="btn pri" data-bk="mail">✉️ ایمیل به خودم</button><button class="btn" data-bk="dl">💾 ذخیره فایل</button><button class="btn" data-bk="copy">📋 کپی متن</button></div><div class="t" style="margin-top:12px">بازیابی</div><div class="fl" style="margin:6px 0"><button class="btn" data-bk="pick">📂 انتخاب فایل پشتیبان</button></div><input id="rf" type="file" accept=".json,application/json,text/plain" style="display:none"><textarea id="rtx" rows="2" placeholder="یا متن پشتیبان را اینجا Paste کن" style="width:100%;padding:8px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit"></textarea><button class="btn" data-bk="rtx" style="margin-top:6px">بازیابی از متن</button></div><div class="m">اطلاعات فقط روی همین مرورگر ذخیره می‌شود. واحدِ خالی، شارژ ماه را ندارد و بدهکار حساب نمی‌شود.</div>'}
+function fld(id,lb,v,t){return '<label>'+lb+'</label><input id="'+id+'" value="'+esc(v)+'"'+(t==='n'?' inputmode="numeric"':t==='t'?' type="tel" dir="ltr"':'')+'>'}
+function wan(p){var d=String(p||'').replace(/[۰-۹]/g,function(c){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(c)}).replace(/\D/g,'');if(d.charAt(0)==='0')d='98'+d.slice(1);return d}
+function openGrp(k,i){
+ var tx=k==='d'?grpText():expText(D.exp[+i]);F={k:'grp'};
+ $('f').innerHTML='<div class="t">ارسال به گروه</div><textarea id="smt" rows="9" readonly style="width:100%;margin-top:8px;padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit">'+esc(tx)+'</textarea><div class="fl" style="margin-top:10px"><button type="button" class="btn pri" data-cp="1">📋 کپی متن</button><a class="btn" target="_blank" rel="noopener" href="https://t.me/share/url?url=%20&text='+encodeURIComponent(tx)+'">تلگرام</a><a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text='+encodeURIComponent(tx)+'">واتساپ</a><button type="button" class="btn" data-sh="1">اشتراک‌گذاری</button>'+(D.S.group?'<a class="btn" data-gc="1" target="_blank" rel="noopener" href="'+esc(D.S.group)+'">باز کردن گروه (متن کپی می‌شود)</a>':'')+'</div><div class="m" style="margin-top:8px">پیام‌رسان‌ها اجازه نمی‌دهند متن مستقیم داخل یک گروهِ مشخص گذاشته شود. روش اول: تلگرام یا واتساپ را بزن، گروه را انتخاب کن و متن آماده است. روش دوم: باز کردن گروه و Paste کردن متن.'+(D.S.group?'':' (لینک گروه را در تنظیمات بنویس.)')+'</div>';
+ $('md').className='on'}
+function openSms(i){
+ var u=D.units[i],tx=smsText(u);
+ F={k:'sms',i:i};
+ $('f').innerHTML='<div class="t">پیامک بدهی — واحد '+esc(u.no)+'</div><div class="m" style="margin-bottom:6px">'+esc(u.owner||'')+' · '+esc(u.phone||'')+'</div><textarea id="smt" rows="8" readonly style="width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit">'+esc(tx)+'</textarea><div class="fl" style="margin-top:10px"><button type="button" class="btn pri" data-cp="1">📋 کپی متن</button><a class="btn" target="_blank" rel="noopener" href="sms:'+esc(u.phone)+'?body='+encodeURIComponent(tx)+'">باز کردن برنامه‌ی پیام</a><a class="btn" target="_blank" rel="noopener" href="https://wa.me/'+wan(u.phone)+'?text='+encodeURIComponent(tx)+'">واتساپ مستقیم</a><button type="button" class="btn" data-sh="1">اشتراک‌گذاری</button></div><div class="m" style="margin-top:8px">اگر برنامه‌ی پیام باز نشد، متن را کپی کن و برای شماره‌ی بالا در پیامک یا واتساپ Paste کن.</div>';
+ $('md').className='on'}
+function chargeFor(y,m,fb){var k=y*12+m,best=null,P=D.S.per||[];P.forEach(function(p){var a=p.fy*12+p.fm,b=p.ty?p.ty*12+p.tm:1e9;if(k>=a&&k<=b)best=p});if(best)return best.amt;if(fb&&P.length){var d=1e9,amt=0;P.forEach(function(p){var a=p.fy*12+p.fm,b=p.ty?p.ty*12+p.tm:1e9,dd=k<a?a-k:k-b;if(dd<d){d=dd;amt=p.amt}});return amt}return 0}
+function inR(y,m){return chargeFor(y,m)>0}
+function mig(){D.S=D.S||{charge:0,group:'',mgr:''};if(!D.S.per){D.S.per=[];if(D.S.charge){var s0=D.S.cs||{y:J.y,m:1};D.S.per.push({id:uid(),fy:s0.y,fm:s0.m,ty:D.S.ce?D.S.ce.y:0,tm:D.S.ce?D.S.ce.m:0,amt:D.S.charge})}}}
+function perH(){
+ var ps=(D.S.per||[]).slice().sort(function(a,b){return a.fy*12+a.fm-(b.fy*12+b.fm)});
+ var h='<div class="card" style="display:block"><div class="t">دوره‌های شارژ</div><div class="m" style="margin:4px 0 8px">هر دوره یک مبلغ ثابت دارد و فقط روی ماه‌های همان دوره اعمال می‌شود. مبلغ دوره‌های قبلی با دوره‌ی جدید تغییر نمی‌کند.</div>';
+ h+=ps.map(function(p){return '<div class="fl" style="border-bottom:1px solid var(--bd);padding:6px 0"><div><div class="t">'+n(p.amt)+' تومان</div><div class="m">از '+MN[p.fm-1]+' '+p.fy+' تا '+(p.ty?MN[p.tm-1]+' '+p.ty:'اکنون (بدون پایان)')+'</div></div><button class="btn" data-pdel="'+p.id+'">🗑</button></div>'}).join('')||'<div class="m">هنوز دوره‌ای تعریف نشده.</div>';
+ h+='<div class="t" style="margin-top:12px">افزودن دوره‌ی جدید</div><label>مبلغ شارژ ماهانه هر واحد (تومان)</label><input id="pa" inputmode="numeric"><label>از (سال و ماه)</label><div class="fl"><input id="pfy" inputmode="numeric" style="flex:1" placeholder="سال" value="'+J.y+'"><select id="pfm" style="flex:1">'+mo(J.m)+'</select></div><label>تا (خالی = بدون پایان)</label><div class="fl"><input id="pty" inputmode="numeric" style="flex:1" placeholder="سال"><select id="ptm" style="flex:1">'+mo(12)+'</select></div><button class="btn pri" data-padd="1" style="margin-top:8px">افزودن دوره</button></div>';
+ return h}
+function padd(){var a=num(v('pa')),fy=num(v('pfy')),fm=+v('pfm'),ty=num(v('pty')),tm=+v('ptm');
+ if(!a||!fy){toast('مبلغ و سال شروع را وارد کن');return}
+ if(ty&&ty*12+tm<fy*12+fm){toast('پایان باید بعد از شروع باشد');return}
+ var nk=fy*12+fm,ne=ty?ty*12+tm:1e9,bad=false,tr=[];D.S.per=D.S.per||[];
+ D.S.per.forEach(function(p){var pa=p.fy*12+p.fm,pe=p.ty?p.ty*12+p.tm:1e9;if(pa<=ne&&pe>=nk){if(pa<nk&&pe<=ne)tr.push(p);else bad=true}});
+ if(bad){toast('این بازه با یک دوره‌ی دیگر تداخل دارد؛ اول آن را حذف کن');return}
+ tr.forEach(function(p){var k=nk-1,y=Math.floor((k-1)/12);lg('پایان دوره‌ی شارژ قبلی ('+n(p.amt)+') به '+MN[k-y*12-1]+' '+y+' تغییر کرد');p.ty=y;p.tm=k-y*12});
+ D.S.per.push({id:uid(),fy:fy,fm:fm,ty:ty||0,tm:ty?tm:0,amt:a});
+ lg('دوره‌ی شارژ جدید: '+n(a)+' تومان از '+MN[fm-1]+' '+fy+' تا '+(ty?MN[tm-1]+' '+ty:'بدون پایان'));
+ save();R()}
+function mo(s){return MN.map(function(x,i){return '<option value="'+(i+1)+'"'+(i+1===s?' selected':'')+'>'+x+'</option>'}).join('')}
+function bkName(){return 'building-backup-'+J.y+'-'+J.m+'-'+J.d+'.json'}
+function bkText(){return JSON.stringify(D)}
+function stamp(){D.S.lb=J.y+'/'+J.m+'/'+J.d;save();R()}
+async function bkSave(){var dl=null;try{if(window.claude&&claude.use)dl=await claude.use('downloads')}catch(e){}
+ if(!dl){toast('ذخیره‌ی فایل در این نمایشگر ممکن نیست؛ متن پشتیبان را کپی کن');return false}
+ try{await dl.save({filename:bkName(),data:bkText()});stamp();return true}catch(e){if(!e||e.code!=='declined')toast('ذخیره نشد؛ متن پشتیبان را کپی کن');return false}}
+async function bkMail(){try{var f=new File([bkText()],bkName(),{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'پشتیبان مدیریت ساختمان'});stamp();return}}catch(e){if(e&&e.name==='AbortError')return}
+ if(await bkSave())toast('فایل ذخیره شد؛ حالا در ایمیل خودت آن را پیوست کن')}
+function bkCopy(){var ta=document.createElement('textarea');ta.value=bkText();document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy')}catch(x){}ta.remove();if(ok){stamp();toast('متن پشتیبان کپی شد ✓')}else toast('کپی نشد')}
+function rsParse(t){try{var o=JSON.parse(t);if(!o||!Array.isArray(o.units)||!Array.isArray(o.exp))throw 0;return o}catch(e){toast('فایل پشتیبان معتبر نیست');return null}}
+function rsAsk(o){window.PEND=o;F={k:'rs'};$('f').innerHTML='<div class="t">بازیابی پشتیبان</div><div class="m" style="margin:8px 0">این پشتیبان '+n(o.units.length)+' واحد و '+n(o.exp.length)+' هزینه دارد. با ادامه، همه‌ی اطلاعات فعلی جایگزین می‌شود.</div><button type="button" class="btn pri" data-rs="1" style="width:100%;padding:12px">جایگزین کن</button>';$('md').className='on'}
+document.addEventListener('change',function(e){if(e.target.id==='b'&&F&&F.k==='e'&&$('xw'))$('xw').style.display=e.target.value==='per'?'none':'';if(e.target.id==='rf'){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var o=rsParse(r.result);if(o)rsAsk(o)};r.readAsText(f);e.target.value=''}});
+function sendTx(tx,ti){if(navigator.share){navigator.share({title:ti||'',text:tx}).catch(function(e){if(!e||e.name!=='AbortError')showTx(tx)})}else{showTx(tx)}}
+function showTx(tx){
+ F={k:'tx'};
+ $('f').innerHTML='<div class="t">متن پیام</div><textarea id="smt" rows="9" readonly style="width:100%;margin-top:8px;padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit">'+esc(tx)+'</textarea><div class="fl" style="margin-top:10px"><button type="button" class="btn pri" data-cp="1">📋 کپی متن</button><a class="btn" href="intent:#Intent;action=android.intent.action.SEND;type=text/plain;S.android.intent.extra.TEXT='+encodeURIComponent(tx)+';end">📤 لیست برنامه‌ها (اندروید)</a></div><div class="m" style="margin-top:8px">متن را کپی کن و در هر برنامه‌ای که می‌خواهی Paste کن.</div>';
+ $('md').className='on'}
+function cpy(){var ta=$('smt'),ok=false;ta.focus();ta.select();ta.setSelectionRange(0,99999);try{ok=document.execCommand('copy')}catch(x){}if(!ok){try{navigator.clipboard.writeText(ta.value);ok=true}catch(x){}}toast(ok?'متن کپی شد ✓':'متن را با نگه‌داشتن انگشت انتخاب و کپی کن')}
+function shr(){var tx=$('smt').value;if(navigator.share){navigator.share({text:tx}).catch(function(){})}else{cpy()}}
+function openPay(t,a,b){
+ var tot,pd,ti,u=U(b||a);
+ if(t==='c'){var m=+b,c=chargeFor(+yr,m,true);u=U(a);if(!c){toast('اول یک دوره‌ی شارژ در تنظیمات تعریف کن');return}tot=c;pd=st(u,yr,m)==='p'?c:cpd(u,yr,m);ti='شارژ '+MN[m-1]+' '+yr+' — واحد '+u.no}
+ else{var e=D.exp[+a],sh=shares(e).filter(function(s){return s.u.id===b})[0];tot=sh?sh.a:0;pd=ep(e,b,tot);ti=e.title+' — واحد '+u.no}
+ F={k:'pay',t:t,a:a,b:b,total:tot,paid:pd,title:ti};
+ $('f').innerHTML='<div class="t">'+esc(ti)+'</div><div class="m" style="margin-bottom:10px">مبلغ کل: '+n(tot)+' · دریافت‌شده: '+n(pd)+' · باقی‌مانده: <b class="bad">'+n(tot-pd)+'</b></div>'+fld('a','مبلغ دریافتی جدید (تومان) — برای اصلاح اشتباه، عدد منفی بنویس','','n')+'<button class="btn pri" type="submit" style="width:100%;padding:12px">ثبت پرداخت</button><div class="fl" style="margin-top:8px"><button type="button" class="btn" data-pf="1">پرداخت کامل</button><button type="button" class="btn" data-p0="1">صفر کردن</button>'+(t==='c'?'<button type="button" class="btn" data-pv="1">واحد خالی بود</button>':'')+'</div>';
+ $('md').className='on'}
+function applyPay(np){
+ var k;
+ if(F.t==='c'){var u=U(F.a);k=yr+'-'+F.b;u.st=u.st||{};u.cp=u.cp||{};
+  if(np>=F.total){u.st[k]='p';delete u.cp[k]}else{if(u.vacant)u.st[k]='x';else delete u.st[k];if(np>0)u.cp[k]=np;else delete u.cp[k]}}
+ else{var e=D.exp[+F.a];e.paid=e.paid||{};if(np>=F.total)e.paid[F.b]=true;else if(np>0)e.paid[F.b]=np;else delete e.paid[F.b]}
+ lg(F.title+': تغییر پرداخت ('+(np-F.paid>=0?'+':'-')+n(Math.abs(np-F.paid))+') — جمع دریافتی '+n(np)+' از '+n(F.total)+(np>=F.total?' ✓ کامل':np>0?' (ناقص)':' ✗'));
+ save();$('md').className='';R()}
+function applyVac(){var u=U(F.a),k=yr+'-'+F.b;u.st=u.st||{};u.cp=u.cp||{};u.st[k]='v';delete u.cp[k];lg(F.title+': واحد خالی ثبت شد —');save();$('md').className='';R()}
+function openF(k,i){
+ F={k:k,i:i};var h='',u=i!=null&&k==='u'?D.units[i]:{};
+ if(k==='u')h=fld('a','شماره واحد',u.no||'')+fld('b','نام ساکن فعلی',u.owner||'')+'<label>نوع ساکن</label><select id="k"><option value="o">مالک</option><option value="t"'+(u.kind==='t'?' selected':'')+'>مستاجر</option></select>'+fld('c','تعداد نفرات',u.people||'','n')+fld('d','شماره تماس',u.phone||'','t')+'<label>وضعیت</label><select id="e"><option value="0">پر (ساکن دارد)</option><option value="1"'+(u.vacant?' selected':'')+'>خالی</option></select>';
+ else h=fld('a','عنوان هزینه (مثلاً تعمیر پمپ)','')+'<label>نوع</label><select id="b"><option value="per">دوره‌ای (نظافت، آسانسور...)</option><option value="rep">تعمیرات</option><option value="oth">متفرقه</option></select>'+fld('c','مبلغ کل (تومان)','','n')+'<div id="xw" style="display:none"><label>روش تقسیم</label><select id="d"><option value="u">بر اساس واحد</option><option value="p">بر اساس نفر</option></select><label>واحدهای مشمول</label><div>'+D.units.map(function(x){return '<label class="cb"><input type="checkbox" class="uc" value="'+x.id+'"'+(x.vacant?'':' checked')+'>'+esc(x.no)+(x.vacant?' (خالی)':'')+'</label>'}).join('')+'</div></div><br>';
+ $('f').innerHTML=h+'<button class="btn pri" type="submit" style="width:100%;padding:12px">ذخیره</button>'+(k==='u'&&i!=null?'<button class="btn bad" type="button" data-udel="'+i+'" style="width:100%;margin-top:8px">حذف واحد</button>':'');
+ $('md').className='on'}
+function v(i){return $(i).value.trim()}
+$('f').addEventListener('submit',function(e){
+ e.preventDefault();if(!v('a'))return;if(F.k==='pay'){var x=num(v('a'));if(!x)return;applyPay(Math.max(0,Math.min(F.total,F.paid+x)));return}
+ if(F.k==='u'){var o={no:v('a'),owner:v('b'),kind:v('k'),people:num(v('c'))||1,phone:v('d'),vacant:v('e')==='1'};if(D.units.some(function(x,j){return j!==F.i&&norm(x.no)===norm(o.no)})){toast('واحد '+o.no+' قبلاً ثبت شده؛ شماره تکراری مجاز نیست');return}if(F.i!=null)ulog(D.units[F.i],o);else lg('واحد '+o.no+' اضافه شد ('+o.owner+')');
+  if(F.i!=null)Object.assign(D.units[F.i],o);else{o.id=uid();o.st={};D.units.push(o)}}
+ else{var us=v('b')==='per'?[]:[].slice.call(document.querySelectorAll('.uc:checked')).map(function(x){return x.value});
+  D.exp.unshift({id:uid(),title:v('a'),type:v('b'),amount:num(v('c')),method:v('d'),units:us,paid:{},date:J.y+'/'+J.m+'/'+J.d});lg('هزینه «'+v('a')+'» به مبلغ '+n(num(v('c')))+' ثبت شد')}
+ save();$('md').className='';R()});
+$('md').addEventListener('click',function(e){if(e.target.id==='md')e.target.className=''});
+$('fab').onclick=function(){openF(tab==='units'?'u':'e',null)};
+document.addEventListener('click',function(e){
+ var el=e.target.closest('[data-t],[data-edit],[data-c],[data-y],[data-pay],[data-del],[data-udel],[data-sv],[data-g],[data-nog],[data-pf],[data-p0],[data-pv],[data-sms],[data-cp],[data-sh],[data-gm],[data-gc],[data-bk],[data-rs],[data-padd],[data-pdel],[data-xp]');if(!el)return;
+ var d=el.dataset;
+ if(d.t){tab=d.t;R()}
+ else if(d.edit){openF('u',+d.edit)}
+ else if(d.y){yr+=+d.y;R()}
+ else if(d.c){var p=d.c.split('|');openPay('c',p[0],p[1])}else if(0){var u,k,s;u={st:{}};
+  u.st[k]=s==='p'?'v':s==='v'?'x':'p';if(u.st[k]==='x'){u.vacant?u.st[k]='x':delete u.st[k]}lg('شارژ '+MN[+p[1]-1]+' '+yr+' واحد '+u.no+': '+({p:'پرداخت شد ✓',v:'خالی ثبت شد —',x:'پرداخت‌نشده ✗'})[s==='p'?'v':s==='v'?'x':'p']);save();R()}
+ else if(d.pay){var q=d.pay.split('|');openPay('e',q[0],q[1])}else if(0){var q=[0,0],ex={paid:{},title:''};ex.paid[q[1]]=!ex.paid[q[1]];lg('هزینه «'+ex.title+'» واحد '+U(q[1]).no+': '+(ex.paid[q[1]]?'پرداخت شد ✓':'پرداخت لغو شد ✗'));save();R()}
+ else if(d.del){ask('e'+d.del,function(){lg('هزینه «'+D.exp[+d.del].title+'» حذف شد');D.exp.splice(+d.del,1);save();R()})}
+ else if(d.udel){ask('u'+d.udel,function(){lg('واحد '+D.units[+d.udel].no+' حذف شد');D.units.splice(+d.udel,1);save();$('md').className='';R()})}
+ else if(d.sv){D.S.group=v('sg');D.S.mgr=v('sm');save();toast('ذخیره شد ✓');return}else if(0){if(num(v('sc'))!==D.S.charge)lg('شارژ ماهانه به '+n(num(v('sc')))+' تومان تغییر کرد');D.S.charge=num(v('sc'));D.S.group=v('sg');D.S.mgr=v('sm');var a=num(v('csy')),b=num(v('cey')),cs=a?{y:a,m:+v('csm')}:null,ce=b?{y:b,m:+v('cem')}:null;if(cs&&ce&&ce.y*12+ce.m<cs.y*12+cs.m){toast('تاریخ پایان باید بعد از شروع باشد');return}if(JSON.stringify(cs)!==JSON.stringify(D.S.cs||null)||JSON.stringify(ce)!==JSON.stringify(D.S.ce||null))lg('بازه‌ی شارژ: '+(cs?MN[cs.m-1]+' '+cs.y:'بدون شروع')+' تا '+(ce?MN[ce.m-1]+' '+ce.y:'بدون پایان'));D.S.cs=cs;D.S.ce=ce;save();R();toast('ذخیره شد ✓')}
+ else if(d.xp){OPEN[d.xp]=!OPEN[d.xp];R()}else if(d.padd){padd()}else if(d.pdel){ask('p'+d.pdel,function(){var pp=D.S.per.filter(function(p){return p.id===d.pdel})[0];if(pp)lg('دوره‌ی شارژ '+n(pp.amt)+' تومان (از '+MN[pp.fm-1]+' '+pp.fy+') حذف شد');D.S.per=D.S.per.filter(function(p){return p.id!==d.pdel});save();R()})}else if(d.bk){var bk=d.bk;if(bk==='dl')bkSave();else if(bk==='mail')bkMail();else if(bk==='copy')bkCopy();else if(bk==='pick')$('rf').click();else if(bk==='rtx'){var ro=rsParse(v('rtx'));if(ro)rsAsk(ro)}}else if(d.rs){D=window.PEND;D.log=D.log||[];D.S=D.S||{charge:0,group:'',mgr:''};mig();lg('اطلاعات از فایل پشتیبان بازیابی شد');save();$('md').className='';R();toast('بازیابی شد ✓')}else if(d.gm){var z=d.gm.split('|');sendTx(z[0]==='d'?grpText():expText(D.exp[+z[1]]),'')}else if(d.gc){cpy()}else if(d.sms){var su=D.units[+d.sms];sendTx(smsText(su),'بدهی واحد '+su.no)}else if(d.cp){cpy()}else if(d.sh){shr()}else if(d.pf){applyPay(F.total)}else if(d.p0){applyPay(0)}else if(d.pv){applyVac()}else if(d.nog){toast('اول لینک گروه را در تنظیمات بنویس')}
+ else if(d.g){var tx=d.g==='d'?grpText():expText(D.exp[+d.i]);
+  try{navigator.clipboard.writeText(tx)}catch(x){}toast('متن کپی شد؛ در گروه Paste کن')}
+});
+mig();
+R();
+</script>
+</body>
+</html>
